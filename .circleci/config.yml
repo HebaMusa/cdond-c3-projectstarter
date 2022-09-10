@@ -192,22 +192,16 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: cimg/python:3.10-alpine3.14
+      - image: cimg/python:3.10
     steps:
       - checkout
       - add_ssh_keys:
           fingerprints: ["50:21:d0:4e:ae:19:c8:75:67:e7:0a:b1:0e:29:a8:08"]
+      - install_ansible   
+      - attach_workspace:
+          at: ~/
       - run:
-          name: Inastall Ansible
-          command: |
-            apk add --no-cache aws-cli
-            pip install --upgrade pip
-            python3 -m pip install ansible
-            ansible --version
-            apk add openssh-client
-
-      - run:
-          name: Configure Server & Run ansible play book
+          name: Configure Server
           command: |
             cd .circleci/ansible
             cat inventory.txt
