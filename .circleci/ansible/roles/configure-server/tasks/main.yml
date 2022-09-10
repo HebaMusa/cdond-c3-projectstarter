@@ -1,0 +1,18 @@
+---
+- name: "Install Node.js from node src "
+  become: true
+  shell: |
+    # Install Node.js version 13 as our base Node.js version
+    curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+  
+- name: "Install Node.js 13"
+  become: true
+  apt:
+    name: ["node.js"]
+    state: latest
+    update_cache: yes
+
+- name: "Install PM2 globaly"
+  npm:
+    name: pm2
+    global: yes
