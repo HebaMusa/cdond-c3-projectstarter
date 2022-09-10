@@ -14,6 +14,6 @@
 
 - name: "Install PM2 globaly"
   npm:
-    command: ln -s /usr/bin/nodejs /usr/bin/node
-    name: pm2
+    # command: ln -s /usr/bin/nodejs /usr/bin/node
+    name: npm i -g pm2
     global: yes
