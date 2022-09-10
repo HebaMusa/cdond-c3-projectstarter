@@ -11,6 +11,20 @@ commands:
             unzip awscliv2.zip
             sudo ./aws/install
 
+  install_nodejs:
+    description: Install Node.js 13.8.0
+    steps:
+      - run:
+          name: Install Node.js 13.8.0
+          command: |
+            # Install Node.js LTS version as our base Node.js version
+            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+            sudo apt install -y nodejs
+
+            # Use n version manager to use Node.js v13.8.0
+            sudo npm install --global n
+            sudo n 13.8.0
+
   install_ansible:
     description: install ansible v2
     steps:
@@ -217,6 +231,9 @@ jobs:
     steps:
       - checkout
       - install_awscli
+      - install_nodejs
+      - restore_cache:
+          keys: [backend-deps]
       - run:
           name: Run migrations
           command: |
