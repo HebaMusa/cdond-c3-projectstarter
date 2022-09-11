@@ -1,6 +1,6 @@
 ---
 
-- name: "configuration play." 
+- name: "configuration-backend deployment play." 
   hosts: web
   remote_user: ubuntu
   become: true
