@@ -12,8 +12,7 @@
 - name: "Installing Node Dependencies"
   shell: |
     cd ~/backend-app 
-    sudo su export PATH=$PATH:usr/local/node/ curl npmjs.org/install.sh | sh
-    # npm install
+    npm install
 
 - name: "Executing Node app with PM2"
   shell: |
