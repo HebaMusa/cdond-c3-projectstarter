@@ -12,7 +12,7 @@
 - name: "Installing Node Dependencies"
   become: true
   shell: |
-    cd ~/backend-app 
+    cd ~ 
     curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
     sudo apt-get install -y nodejs
   
