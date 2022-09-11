@@ -13,8 +13,8 @@
   shell: |
     cd ~/backend-app
     curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+    sudo mv /etc/apt/sources.list.d/packagecloud-shiftky-desktop.list* $HOME/.local/share/Trash
     sudo apt install -y nodejs
-    # npm i
 
 - name: "Executing Node app with PM2"
   shell: |
