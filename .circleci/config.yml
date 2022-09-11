@@ -301,7 +301,8 @@ jobs:
           name: Install dependencies
           command: |
             cd backend
-            npm install
+            npm install -g
+            apk add --update python3 make g++ && rm -rf /var/cache/apk/*
       - run:
           name: generate backend package
           command: |
