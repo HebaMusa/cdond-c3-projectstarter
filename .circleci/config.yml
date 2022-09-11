@@ -287,7 +287,6 @@ jobs:
     docker:
        - image: cimg/python:3.10
     become: true
-    become_user: root
     steps:
       - checkout
       - install_awscli
