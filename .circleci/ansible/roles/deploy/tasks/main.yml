@@ -5,23 +5,25 @@
     state: directory
 
 - name: "Unarchive backend files"
+  become: true
   unarchive:
     src: artifact.tar.gz
     dest: ~/backend-app
+    shell: |
+      cd /home/ubuntu/
+      tar -xvzf artifact.tar.gz
 
 - name: "Installing Node Dependencies"
   become: true
   shell: |
-    cd ~ 
+    cd ~/backend-app 
     curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
     sudo apt-get install -y nodejs
   
 - name: "Install Node.js 13"
-  become: true
-  apt:
-    name: ["nodejs"]
-    state: latest
-    update_cache: yes
+  shell: |
+     cd ~/backend-app
+     npm install
 
 - name: "Executing Node app with PM2"
   shell: |
