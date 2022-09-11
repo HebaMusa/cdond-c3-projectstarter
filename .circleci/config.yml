@@ -58,9 +58,8 @@ commands:
           name: Revert migrations
           when: on_fail  
           command: |
-            SUCCESS=$(curl -k  https://kvdb.io/${KVDB_BUCKET}/migration_<<parameters.Workflow_ID>>)
-            SUCCESS = 1
-            if(( $SUCCESS==1 ))
+            res=$(curl -k  https://kvdb.io/${KVDB_BUCKET}/migration_<<parameters.Workflow_ID>>)
+            if(( $res==1 ))
             then
               cd ~/project/backend
               npm install
