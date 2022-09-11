@@ -301,8 +301,7 @@ jobs:
           name: Install dependencies
           command: |
             cd backend
-            unsafe-perm=true
-            npm install -g
+            npm install --unsafe-perm=true -g now
       - run:
           name: generate backend package
           command: |
