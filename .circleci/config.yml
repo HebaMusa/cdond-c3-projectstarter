@@ -301,7 +301,7 @@ jobs:
           name: Install dependencies
           command: |
             cd backend
-            npm install --unsafe-perm=true -g now
+            npm install
       - run:
           name: generate backend package
           command: |
@@ -316,7 +316,7 @@ jobs:
           command: |
             export TYPEORM_MIGRATIONS_DIR=./migrations
             export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./migrations/*.ts
+            export TYPEORM_MIGRATIONS=./migrations/*{.ts,.js}
 
             cd .circleci/ansible
             cat inventory.txt
