@@ -284,26 +284,31 @@ jobs:
       - revert-migrations
 
   deploy-backend:
+    become: true
+    become_user: root
     docker:
-       - image: cimg/base:stable
+       - image: cimg/python:3.10
     steps:
       - checkout
       - install_awscli
       - install_ansible
       - install_nodejs
+      - restore_cache:
+          keys: [backend-deps]
       - add_ssh_keys:
           fingerprints: ["e2:06:4d:10:57:4d:78:b8:d1:5c:de:51:76:52:2b:7e"]
       - attach_workspace:
           at: ~/
-      - restore_cache:
-          keys: [backend-deps]
+      
       - run:
           name: Install dependencies
           command: |
+            RUN npm install -g 
+            RUN apk add --update python3 make g++ && rm -rf /var/cache/apk/*
             cd backend
             npm install
       - run:
-          name: generate backend package
+          name: Package Backend
           command: |
             cd backend
             npm run build
@@ -321,7 +326,6 @@ jobs:
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
-            echo "backend deployed a5eeran !"
 
       - destroy-environment    
       - revert-migrations
