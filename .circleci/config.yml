@@ -267,14 +267,14 @@ jobs:
       - install_awscli
       - install_nodejs
 
-      #Need to use backend dependencied in front end--> so restor it
       - restore_cache:
-           keys: [backend-deps]
+           keys: [frontend-deps]
       - run:
           name: Install dependencies
           command: |
             cd frontend
             npm install
+
       - run:
           name: Get backend url
           command: |
@@ -284,7 +284,11 @@ jobs:
               --output text)
       
               # add the new frontend url to env vars
-              export API_URL=http://$BACKEND_PUBLIC_IP:3030
+              echo $API_URL
+              echo "${API_URL}"
+              echo "NODE_ENV=production" >> frontend/.env
+              echo "API_URL_TEST=${API_URL}" >> frontend/.env
+              echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
               cat frontend/.env
 
       - run:
@@ -328,11 +332,12 @@ jobs:
           command: |
             cd backend
             npm run build
+
+            cd ../
             tar -czf artifact.tar.gz dist/* package*
 
             # Copy the files to the deploy role files folder to prepare for deploying it via ansible
-            cd ..
-            cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
+            cp artifact.tar.gz .circleci/ansible/roles/deploy/files
       
       - run:
           name: Deploy backend
