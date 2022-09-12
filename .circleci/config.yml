@@ -18,8 +18,12 @@ commands:
           name: Install Node.js 13.8.0
           command: |
             # Install Node.js LTS version as our base Node.js version
-            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
             sudo apt install -y nodejs
+
+            # Use n version manager to use Node.js v13.8.0
+            sudo npm install --global n
+            sudo n 13.8.0
 
   install_ansible:
     description: install ansible latest
@@ -58,13 +62,16 @@ commands:
           name: Revert migrations
           when: on_fail  
           command: |
-            res=$(curl -k  https://kvdb.io/${KVDB_BUCKET}/migration_<<parameters.Workflow_ID>>)
-            if(( $res==1 ))
+            SUCCESS=$(curl --insecure  https://kvdb.io/${KVDB_BUCKET}/migration_<< parameters.Workflow_ID >>)
+
+            # Logic for reverting the database state
+            if (( $SUCCESS == 1 ));
             then
               cd ~/project/backend
               npm install
-              npm run migrations:revert
+              npm run migration:revert
             fi
+
             
 jobs:
   build-frontend:
@@ -205,9 +212,10 @@ jobs:
       - image: cimg/python:3.10
     steps:
       - checkout
+      - install_awscli
+      - install_ansible   
       - add_ssh_keys:
           fingerprints: ["e2:06:4d:10:57:4d:78:b8:d1:5c:de:51:76:52:2b:7e"]
-      - install_ansible   
       - attach_workspace:
           at: ~/
       - run:
@@ -222,10 +230,13 @@ jobs:
 
   run-migrations:
     docker:
-       - image: cimg/node:13.8.0
+       - image: cimg/python:3.10
     steps:
       - checkout
       - install_awscli
+      - install_nodejs
+      - restore_cache:
+          keys: [backend-deps]
       - run:
           name: Run migrations
           command: |
@@ -249,27 +260,30 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/python:3.10
     steps:
       - checkout
       - install_awscli
       - install_nodejs
+
+      #Need to use backend dependencied in front end--> so restor it
       - restore_cache:
-           keys: [frontend-deps]
+           keys: [backend-deps]
       - run:
           name: Install dependencies
           command: |
             cd frontend
-             npm install
+            npm install
       - run:
           name: Get backend url
           command: |
-              BACKEND_PUBLIC_IP=$(aws ec2 describe-instances --region us-east-1 \
+              BACKEND_PUBLIC_IP=$(aws ec2 describe-instances  \
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
       
-              echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
+              # add the new frontend url to env vars
+              export API_URL=http://$BACKEND_PUBLIC_IP:3030
               cat frontend/.env
 
       - run:
@@ -277,7 +291,8 @@ jobs:
           command: |
            cd frontend
            npm run build
-           tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+
+           # copy the artifact to s3 bucket
            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
 
       - destroy-environment    
@@ -285,18 +300,22 @@ jobs:
 
   deploy-backend:
     docker:
-       - image: cimg/base:stable
+       - image: cimg/python:3.10
     steps:
       - checkout
-      - install_awscli
       - install_ansible
+      - install_awscli
       - install_nodejs
-      - add_ssh_keys:
-          fingerprints: ["e2:06:4d:10:57:4d:78:b8:d1:5c:de:51:76:52:2b:7e"]
-      - attach_workspace:
-          at: ~/
+
       - restore_cache:
           keys: [backend-deps]
+
+      - add_ssh_keys:
+          fingerprints: ["e2:06:4d:10:57:4d:78:b8:d1:5c:de:51:76:52:2b:7e"]
+      
+      - attach_workspace:
+          at: ~/
+      
       - run:
           name: Install dependencies
           command: |
@@ -310,19 +329,22 @@ jobs:
             npm run build
             tar -czf artifact.tar.gz dist/* package*
 
+            # Copy the files to the deploy role files folder to prepare for deploying it via ansible
             cd ..
             cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files
+      
       - run:
           name: Deploy backend
           command: |
             export TYPEORM_MIGRATIONS_DIR=./migrations
             export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
-            export TYPEORM_MIGRATIONS=./migrations/*{.ts,.js}
+            export TYPEORM_MIGRATIONS=./migrations/*.ts
 
             cd .circleci/ansible
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
-            echo "backend deployed a5eeran !!!!!"
+            
+            echo "backend deployed AL7L !!!!!"
 
       - destroy-environment    
       - revert-migrations

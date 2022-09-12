@@ -2,17 +2,24 @@
 - name: "Install Node.js from node src "
   become: true
   shell: |
-    curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-    sudo apt-get install -y nodejs
+      # Install Node.js LTS version as our base Node.js version
+      curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+      sudo apt-get install -y nodejs
+
+      # Use n version manager to use Node.js v13.8.0
+      sudo npm install -g n
+      sudo n 13.8.0
   
-- name: "Install Node.js 13"
-  become: true
-  apt:
-    name: ["nodejs"]
-    state: latest
-    update_cache: yes
+# - name: "Install Node.js 13"
+#   become: true
+#   apt:
+#     name: ["nodejs"]
+#     state: latest
+#     update_cache: yes
 
 - name: "Install PM2 globaly"
-  become: true
-  shell: |
-    apt update && apt install sudo curl && curl -sL https://raw.githubusercontent.com/Unitech/pm2/master/packager/setup.deb.sh | sudo -E bash -
+  npm:
+      name: pm2
+      global: yes
+  # shell: |
+  #   apt update && apt install sudo curl && curl -sL https://raw.githubusercontent.com/Unitech/pm2/master/packager/setup.deb.sh | sudo -E bash -
