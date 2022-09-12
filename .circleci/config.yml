@@ -163,10 +163,14 @@ jobs:
 
   deploy-infrastructure:
     docker:
-       - image: cimg/python:3.10
+       - image: amazon/aws-cli
     steps:
       - checkout
       - install_awscli
+      - run:
+          name: install tar and gzip
+          command: |
+             yum install -y tar gzip
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -202,21 +206,19 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: cimg/python:3.10
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
       - add_ssh_keys:
           fingerprints: ["e2:06:4d:10:57:4d:78:b8:d1:5c:de:51:76:52:2b:7e"]
-      - install_ansible   
       - attach_workspace:
-          at: ~/
+          at: ~/     
+      - install_ansible   
       - run:
           name: Configure Server
           command: |
             cd .circleci/ansible
-            cat inventory.txt
-
-            ansible-playbook -i inventory.txt configure-server.yml
+            ansible-playbook -i inventory.txt configure-server.yml -u ubuntu
 
       - destroy-environment      
 
@@ -249,18 +251,18 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: cimg/base:stable
+      - image: circleci/node:13.8.0
     steps:
       - checkout
       - install_awscli
-      - install_nodejs
       - restore_cache:
            keys: [frontend-deps]
       - run:
           name: Install dependencies
           command: |
             cd frontend
-             npm install
+            npm install
+            sudo apt install -y python3
       - run:
           name: Get backend url
           command: |
@@ -276,9 +278,15 @@ jobs:
           name: Deploy frontend objects
           command: |
            cd frontend
+           npm install
            npm run build
            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+           
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - env_vars
 
       - destroy-environment    
       - revert-migrations
