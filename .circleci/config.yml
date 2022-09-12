@@ -288,53 +288,24 @@ jobs:
        - image: circleci/node:13.8.0
     steps:
       - checkout
+      - install_awscli
+      # - install_ansible
+      # - install_nodejs
       - add_ssh_keys:
           fingerprints: ["e2:06:4d:10:57:4d:78:b8:d1:5c:de:51:76:52:2b:7e"]
       - attach_workspace:
           at: ~/
-     
+      - restore_cache:
+          keys: [backend-deps]
       - run:
           name: generate backend package
           command: |
             sudo apt install -y python3
             sudo apt install -y tar gzip
       - run:
-          name: Install ansible
-          command: |
-            sudo apt install -y ansible
-      
-      - install_awscli
-
-      - restore_cache:
-          keys: [backend-deps]
-
-      - run:
-          name: Execute backend deploy
+          name: Deploy backend
           command: |
             cd backend
-            touch .env
-            export TYPEORM_CONNECTION=${TYPEORM_CONNECTION}
-            export TYPEORM_MIGRATIONS_DIR=${TYPEORM_MIGRATIONS_DIR}
-            export TYPEORM_ENTITIES=${TYPEORM_ENTITIES}
-            export TYPEORM_MIGRATIONS=${TYPEORM_MIGRATIONS}
-            export TYPEORM_HOST=${TYPEORM_HOST}
-            export TYPEORM_PORT=${TYPEORM_PORT}
-            export TYPEORM_USERNAME=${TYPEORM_USERNAME}
-            export TYPEORM_PASSWORD=${TYPEORM_PASSWORD}
-            export TYPEORM_DATABASE=${TYPEORM_DATABASE}
-
-            echo 'NODE_ENV=local' >> .env
-            echo 'VERSION=1' >> .env
-            echo TYPEORM_CONNECTION=$TYPEORM_CONNECTION >> .env
-            echo TYPEORM_MIGRATIONS_DIR=$TYPEORM_MIGRATIONS_DIR >> .env
-            echo TYPEORM_ENTITIES=$TYPEORM_ENTITIES >> .env
-            echo TYPEORM_MIGRATIONS=$TYPEORM_MIGRATIONS >> .env
-            echo TYPEORM_HOST=$TYPEORM_HOST >> .env
-            echo TYPEORM_PORT=$TYPEORM_PORT >> .env
-            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> .env
-            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> .env
-            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> .env
-
             npm install
             npm run build
             cd ..
