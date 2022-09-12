@@ -1,60 +1,26 @@
 ---
 - name: "Creates backend app directory"
   become: true
-  file:
-    path: ~/backend-app
-    state: directory
+  become_method: sudo
+  shell: |
+    mkdir /var/www
+    sudo chown -R ubuntu:ubuntu /var/www
+    sudo chmod 2775 /var/www
 
-- name: "Unarchive backend files"
+- name: "move backend gz"
   become: true
-  unarchive:
+  copy:
     src: artifact.tar.gz
-    dest: ~/backend-app
+    dest: /home/ubuntu/artifact.tar.gz
+    backup: yes
 
-- name: "Installing Node Dependencies"
-  become: true
+- name: extract
   shell: |
-    # cd ~/backend-app 
-    # curl -sL https://deb.nodesource.com/setup_13.x | sudo -E bash -
-    # sudo apt-get install -y nodejs
-    # Install Node.js LTS version as our base Node.js version
-    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-    sudo apt update && apt install sudo curl && curl -sL https://raw.githubusercontent.com/Unitech/pm2/master/packager/setup.deb.sh | sudo -E bash -
+    cd /home/ubuntu/
+    tar -xvzf artifact.tar.gz
 
-    # sudo apt-get install -y nodejs
-
-    # Use n version manager to use Node.js v13.8.0
-    sudo npm install -g n
-    sudo n 13.8.0
-  
-- name: "Install Node.js 13"
-  become : true
+- name: run project
   shell: |
-     cd ~/backend-app
-     npm install
-
-- name: "Install PM2 Globally"
-  become: true
-  npm:
-    name: pm2
-    global: yes
-
-- name: "Executing Node app with PM2"
-  become : true
-  shell: |
-    cd ~/backend-app/dist
+    npm install
     pm2 stop default
-    pm2 start main.js
-
-  register: execute_node
-
-- name: print message
-  become: true
-  debug:
-    msg: "{{ execute_node.stdout_lines }}"
-
-- name: "Configure pm2 to start as service"
-  become: true
-  shell: |
-    sudo su -c "env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu"
-    pm2 save
+    pm2 start npm -- start
