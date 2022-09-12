@@ -15,13 +15,11 @@
     backup: yes
 
 - name: un-archived backend folder
-  become: true
   shell: |
     cd /home/ubuntu/
     tar -xvzf artifact.tar.gz
 
 - name: execute backend
-  become: true
   shell: |
     npm install
     pm2 stop default
