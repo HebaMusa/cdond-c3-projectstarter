@@ -44,8 +44,8 @@ commands:
           when: on_fail
           command: |
             aws cloudformation delete-stack --stack-name udapeople-backend-<<parameters.Workflow_ID>>
-            aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive --region us-east-1
-            aws cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.Workflow_ID>> --region us-east-1
+            aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.Workflow_ID>>
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -186,7 +186,7 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |        
-              BACKEND_PUBLIC_IP=$(aws ec2 describe-instances --region us-east-1 \
+              BACKEND_PUBLIC_IP=$(aws ec2 describe-instances \
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
@@ -264,7 +264,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-              BACKEND_PUBLIC_IP=$(aws ec2 describe-instances --region us-east-1 \
+              BACKEND_PUBLIC_IP=$(aws ec2 describe-instances  \
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
