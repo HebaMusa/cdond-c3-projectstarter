@@ -289,8 +289,8 @@ jobs:
     steps:
       - checkout
       - install_awscli
-      - install_ansible
-      - install_nodejs
+      # - install_ansible
+      # - install_nodejs
       - add_ssh_keys:
           fingerprints: ["e2:06:4d:10:57:4d:78:b8:d1:5c:de:51:76:52:2b:7e"]
       - attach_workspace:
@@ -302,6 +302,11 @@ jobs:
           command: |
             sudo apt install -y python3
             sudo apt install -y tar gzip
+      - run:
+          name: Install ansible
+          command: |
+            sudo apt install -y ansible
+            
       - run:
           name: Deploy backend
           command: |
