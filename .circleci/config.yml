@@ -411,6 +411,8 @@ jobs:
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --stack-name InitialStack
 
+              echo "Frontend distribution updated successfully."
+
       - destroy-environment    
       - revert-migrations
 
