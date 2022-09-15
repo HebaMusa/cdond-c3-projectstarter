@@ -2,7 +2,7 @@ URL01 (github public repository):
 https://github.com/HebaMusa/cdond-c3-projectstarter
 
 URL02 (S3 Bucket for green front end deployment):
-http://udapeople-a68d862.s3-website-us-east-1.amazonaws.com/#/employees
+http://udapeople-8da90ea.s3-website-us-east-1.amazonaws.com/#/employees
 
 URL03 (cloudfront distribution for blue production deployment):
 http://dz0vfkoxqfa81.cloudfront.net/#/employees
