@@ -1,0 +1,14 @@
+URL01 (github public repository):
+https://github.com/HebaMusa/cdond-c3-projectstarter
+
+URL02 (S3 Bucket for green front end deployment):
+http://udapeople-a68d862.s3-website-us-east-1.amazonaws.com/#/employees
+
+URL03 (cloudfront distribution for blue production deployment):
+http://dz0vfkoxqfa81.cloudfront.net/#/employees
+
+URL04 (Backend):
+ec2-44-211-113-125.compute-1.amazonaws.com
+
+URL05 (Prometheus server):
+ec2-34-228-19-2.compute-1.amazonaws.com
